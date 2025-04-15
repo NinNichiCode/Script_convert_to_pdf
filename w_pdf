@@ -1,0 +1,27 @@
+#!/bin/bash
+
+for file in "$@"
+do
+    if [[ ! -f "$file" ]]; then
+        echo "File not found: $file"
+        continue
+    fi
+
+    # Chuyển đường dẫn từ Unix style (/d/...) sang Windows style (D:\...)
+    unix_path=$(realpath "$file")
+    drive_letter=$(echo "$unix_path" | cut -d'/' -f2 | tr '[:lower:]' '[:upper:]')
+    win_path="${drive_letter}:\\$(echo "$unix_path" | cut -d'/' -f3- | sed 's/\//\\/g')"
+    win_output_pdf="${win_path%.*}.pdf"
+
+    echo " Converting: $win_path --> $win_output_pdf"
+
+    powershell.exe -NoProfile -Command "
+    \$word = New-Object -ComObject Word.Application;
+    \$word.Visible = \$false;
+    \$doc = \$word.Documents.Open(\"$win_path\");
+    \$doc.SaveAs([ref]\"$win_output_pdf\", 17);
+    \$doc.Close();
+    \$word.Quit();"
+
+    echo " Done: $file --> $win_output_pdf"
+done

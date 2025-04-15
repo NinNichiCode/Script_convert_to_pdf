@@ -1,0 +1,19 @@
+#!/bin/bash
+
+SCRIPT_PATH="/d/SCRIPTS/excel2pdf.ps1"
+
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 file1.xlsx [file2.xls ...]"
+    exit 1
+fi
+
+for INPUT_FILE in "$@"; do
+    # Tạo output từ input
+    EXT="${INPUT_FILE##*.}"
+    BASENAME="$(basename "$INPUT_FILE" .$EXT)"
+    OUTPUT_FILE="${BASENAME}.pdf"
+
+    echo "Converting: $INPUT_FILE → $OUTPUT_FILE"
+
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT_PATH" "$INPUT_FILE" "$OUTPUT_FILE"
+done

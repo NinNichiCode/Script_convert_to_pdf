@@ -1,0 +1,24 @@
+#!/bin/bash
+
+for file in "$@"
+do
+    # Chuyển sang đường dẫn Windows nếu đang dùng Git Bash
+    full_path=$(realpath "$file")
+    drive_letter=$(echo "$full_path" | cut -d'/' -f2 | tr '[:lower:]' '[:upper:]')
+    win_path="${drive_letter}:\\$(echo "$full_path" | cut -d'/' -f3- | sed 's/\//\\/g')"
+    win_output="${win_path%.*}.pdf"
+
+    echo " Converting: $file --> ${win_output}"
+
+    powershell.exe -NoProfile -Command "
+        \$ppt = New-Object -ComObject PowerPoint.Application;
+        \$ppt.Visible = -1;  # 1 = msoTrue, sẽ mở ứng dụng,  -1 là giá trị mặc định khi PowerPoint chạy
+        \$ppt.WindowState = 2;  # 2 = ppWindowMinimized (thu nhỏ cửa sổ)
+        \$presentation = \$ppt.Presentations.Open('$win_path', \$false, \$false, \$false);
+        \$presentation.SaveAs('$win_output', 32);  # 32 = PDF
+        \$presentation.Close();
+        \$ppt.Quit();
+    "
+
+    echo " Done: $file --> ${win_output}"
+done

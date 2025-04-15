@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Check if ImageMagick (magick) is installed
+if ! command -v magick &> /dev/null; then
+    echo "The 'magick' command is not found. Please install ImageMagick and make sure it is in your PATH."
+    exit 1
+fi
+
+# Convert each .jpg file to a separate .pdf file
+for img in *.png; do
+    # Get the filename without extension
+    filename="${img%.*}"
+    echo "Converting $img to $filename.pdf ..."
+    magick "$img" "$filename.pdf"
+
+    if [ $? -eq 0 ]; then
+        echo "Successfully converted $img to $filename.pdf"
+    else
+        echo "Failed to convert $img"
+    fi
+done
